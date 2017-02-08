@@ -19,12 +19,37 @@
 	
 	.data ;variables declared below
 	
+	;getting data as a string
+	firstInput 	byte 16 dup(?)    ;declare new variable with no info inside and 16 bytes
+	secondInput byte 16 dup(?)
+	thirdInput 	byte 16 dup(?)
+	fourthInput byte 16 dup(?)
+	
+	;passing to be integer
+	firstInputNum 	dword  ?   ;double word with no value inside
+	secondInputNum  dword  ? 
+	thirdInputNum   dword  ? 
+	fourthInputNum  dword  ?
+	
+	totalVal    byte 16 dup(?)   ;stores the result of the equation
+	
+	
+	
+	
 
 	
 	.code  ;here the code begins
 	
 _start: 
 
+	INVOKE getstring, ADDR firstInput    ;getstring and store it in the address of firstInput
+	INVOKE getstring, ADDR secondInput
+	INVOKE putstring, ADDR crlf          ;creates a newline (endl)
+	INVOKE getstring, ADDR thirdInput
+	INVOKE getstring, ADDR fourthInput
+	
+	
+	
 	
 
 		
