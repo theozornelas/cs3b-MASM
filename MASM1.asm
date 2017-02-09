@@ -15,7 +15,7 @@
 	getstring PROTO Near32 stdcall, lpStringToHold:dword, numChars:dword ; inputs max of numchars
 	putstring PROTO Near32 stdcall, lpStringToDisplay:dword			     ;displays null-terminated string
 	ascint32	PROTO Near32 stdcall, lpStringToConvert:dword			 ;result in EAX
-	intasc32	PROTO Near32 stdcall, lpStringToHold:dword, dNumToConvert:dword
+	intasc32Comma	PROTO Near32 stdcall, lpStringToHold:dword, dNumToConvert:dword
 	
 	.data ;variables declared below
 	
