@@ -33,6 +33,9 @@
 	
 	totalVal    byte 16 dup(?)   ;stores the result of the equation
 	
+
+	
+	
 	
 	
 	
@@ -41,12 +44,38 @@
 	.code  ;here the code begins
 	
 _start: 
-
-	INVOKE getstring, ADDR firstInput    ;getstring and store it in the address of firstInput
-	INVOKE getstring, ADDR secondInput
+	
+	;get data from the user
+	
+	;get first input
+	INVOKE getstring, ADDR firstInput, 16    ;getstring and store it in the address of firstInput
+	
+	;get second input
+	INVOKE getstring, ADDR secondInput, 16 
 	INVOKE putstring, ADDR crlf          ;creates a newline (endl)
-	INVOKE getstring, ADDR thirdInput
-	INVOKE getstring, ADDR fourthInput
+	
+	;get third input
+	INVOKE getstring, ADDR thirdInput, 16 
+	
+	;get fourth input
+	INVOKE getstring, ADDR fourthInput, 16 
+	INVOKE putstring, ADDR crlf
+	
+	;get data and parse it into an integer value in a separate variable/location
+	
+	INVOKE ascint32, ADDR firstInput
+	mov firstInputNum, eax
+	
+	INVOKE ascint32, ADDR secondInput
+	mov secondInputNum, eax
+	
+	INVOKE ascint32, ADDR thirdInput
+	mov thirdInputNum, eax
+	
+	INVOKE ascint32, ADDR fourthInput
+	mov fourthInputNum, eax
+	
+	
 	
 	
 	
