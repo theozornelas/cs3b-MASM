@@ -16,11 +16,15 @@
 	intasc32Comma	PROTO Near32 stdcall, lpStringToHold:dword, dval:dword				 ;output number with commas
 	hexToChar       PROTO Near32 stdcall, lpDestStr:dword, lpSourceStr:dword, dLen:dword ;convert hexadecimal to characters
 	ExitProcess 	PROTO Near32 stdcall, dwExitCode:dword  							 ;capitalization not necessary
-	getstring 		PROTO Near32 stdcall, lpStringToHold:dword, numChars:dword 			 ;inputs max of numchars
 	putstring 		PROTO Near32 stdcall, lpStringToDisplay:dword						 ;displays null-terminated string
 	ascint32		PROTO Near32 stdcall, lpStringToConvert:dword						 ;result in EAX
 	intasc32		PROTO Near32 stdcall, lpStringToHold:dword, dNumToConvert:dword		 ;converts the int into asc 32
+	getche		PROTO Near32 stdcall  ;returns character in the AL register
+ 	getch		PROTO Near32 stdcall  ;returns character in the AL register
+	putch		PROTO Near32 stdcall, bChar:byte
 
+	
+	
 	;variables declared below
 	.data
 
@@ -76,7 +80,10 @@
 	
 	;value storing variables
 	
-	strInput 			byte 11 dup(?)
+	strInputOne 		byte 11 dup(?)
+	strInputTwo		    byte 11 dup(?)
+	
+	
 	strAddResult 		byte 15 dup(?)
 	strSubResult 		byte 15 dup(?)
 	strProductResult 	byte 15 dup(?)
@@ -92,13 +99,13 @@
  
  ;get first input
  
- INVOKE getstring firstNumPromp
+ INVOKE putstring, ADDR firstNumPromp
  call getInputProc
 	
 bareBack:
 	CMP AL, 13 ;did the user input an enter
 	JE exitProgram
-	JNE addNums 
+	;JNE addNums 
 	
 	;if !JE
 	MOV strInput[ESI], AL	;move contents of AL into the string input
@@ -108,7 +115,7 @@ bareBack:
 	
 
 ;get second input 
-INVOKE getstring secondNumPrompt
+INVOKE putstring, ADDR secondNumPrompt
 call getInputProc
 
  
@@ -157,6 +164,7 @@ exitProgram:
  PUBLIC _start
 
 getInputProc  proc 
+
 	INVOKE getch				;store result in the AL
 	CMP AL, 8 					;checks for backspace
 	
@@ -166,9 +174,7 @@ getInputProc  proc
 	JNE bareBack
 	
 	;if inputted backspace
-	JE exitProgram
-	
-
+	;JE exitProgram
 	
 	RET
 getInputProc  endp
