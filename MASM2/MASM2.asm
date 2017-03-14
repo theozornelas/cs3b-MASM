@@ -83,6 +83,10 @@
 	strInputOne 		byte 11 dup(?)
 	strInputTwo		    byte 11 dup(?)
 	
+	strSpaceInput       byte 8,20,8
+
+	;counter for the spaces
+	dword counter 0
 	
 	strAddResult 		byte 15 dup(?)
 	strSubResult 		byte 15 dup(?)
@@ -90,6 +94,8 @@
 	strQuotientResult 	byte 15 dup(?)
 	strRemResult 		byte 15 dup(?)
 	
+	;6.3 conditional jumps
+	;pg 202
 
 ;*********start the executable code here***************
 
@@ -100,7 +106,18 @@
  ;get first input
  
  INVOKE putstring, ADDR firstNumPromp
- call getInputProc
+
+ getFirstInput:
+ 	INVOKE getch				;store result in the AL
+	CMP AL, 8 					;checks for backspace
+	JNE issaBack
+
+
+
+	
+
+issaBack:
+	INVOKE putstring, ADDR strSpaceInput
 	
 bareBack:
 	CMP AL, 13 ;did the user input an enter
