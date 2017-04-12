@@ -44,12 +44,13 @@ strCount				dword	?
 _start:
 	mov EAX, 0									; ensures first instruction can be executed in Ollydbg
 
-	INVOKE putstring, ADDR strAssignmentHeader	; outputs assignment header
+	;INVOKE putstring, ADDR strAssignmentHeader	; outputs assignment header
 	
-	INVOKE putstring, ADDR strCRLF
+	;INVOKE putstring, ADDR strCRLF
 	
 	push OFFSET strName
 	call String_toLowerCase
+	add esp, 4
 	
 	;INVOKE intasc32, ADDR strCount, EAX
 	;INVOKE putstring, ADDR strCount
@@ -63,45 +64,40 @@ _start:
 
 String_toLowerCase proc Near3
 
-push ebp
-mov ebp, esp
+push  ebp
+mov   ebp, esp
  
- push al  ;push string in
- push bl
- push esi ;start counter
+ push eax  		;push string in
+ push ebx
+ push esi 		;start counter
  
- mov esi, 0			;initialize to zero
+ mov esi, 0		;initialize to zero
  
  mainLoop:
  
- cmp al[esi], 0
- JE  endthepain
- 
- cmp al[esi], 
- 
- mov bl, 91    ;if less than 91
+ mov eax, 91    ;if less than 91
  JB checkupper
  
  checkupper:
-    cmp bl, 64			;if greater than 64
+    cmp eax, 64			;if greater than 64
 	JA  convertToLower	;go to convert character
 	
 	JMP endthepain
 	
 	;convert the character by adding 32 to it
  convertToLower:
-	mov bl[esi], bl[esi] + 32
+	mov bl, byte ptr [eax + esi] + 32
  
  ;finish the method
  endthepain:
-	mov al, esi
-    pop al
-    pop bl
+	;mov al, esi
+    pop eax
+    ;pop bx
     pop esi
  
  RET 
  
-String_toLowerCase
+String_toLowerCase endp
 	
 	
 String_length	proc Near32
