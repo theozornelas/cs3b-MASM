@@ -44,16 +44,18 @@ strCount				dword	?
 _start:
 	mov EAX, 0									; ensures first instruction can be executed in Ollydbg
 
-	;INVOKE putstring, ADDR strAssignmentHeader	; outputs assignment header
+	INVOKE putstring, ADDR strAssignmentHeader	; outputs assignment header
 	
-	;INVOKE putstring, ADDR strCRLF
+	INVOKE putstring, ADDR strCRLF
 	
 	push OFFSET strName
+	
 	call String_toLowerCase
+	
 	add esp, 4
 	
 	;INVOKE intasc32, ADDR strCount, EAX
-	;INVOKE putstring, ADDR strCount
+	INVOKE putstring, EAX
 	
 
 	INVOKE ExitProcess, 0						; terminates program normally	
@@ -61,40 +63,60 @@ _start:
 
 ;+String_toUpperCase(string1:String):String   
 ;It converts the string to upper case string
+String_toLowerCase proc Near32
 
-String_toLowerCase proc Near3
-
-push  ebp
-mov   ebp, esp
+push  ebp			;preserve
+mov   ebp, esp		;stack frame
  
- push eax  		;push string in
- push ebx
- push esi 		;start counter
+ push ebx		;word to be converted to lower case
+ push esi 		;push counter
  
  mov esi, 0		;initialize to zero
  
+ mov ebx, [ebp + 8] ;get data in that position and put into the ebx
+ 
  mainLoop:
  
- mov eax, 91    ;if less than 91
+ cmp byte ptr [ebx + esi], 91    ;if less than 91 (have to use byte ptr because we are comparing byte vs byte)
  JB checkupper
  
+ cmp ebx, 0			;if there is nothing
+ JMP endthepain		;end the procedure
+ 
+ ;other wise just move past it to the next character
+ 
+ inc esi						;increment counter
+ JMP mainLoop 					;start the comparison again
+ 
  checkupper:
-    cmp eax, 64			;if greater than 64
+    cmp byte ptr [ebx + esi], 64			;if greater than 64
 	JA  convertToLower	;go to convert character
 	
-	JMP endthepain
+	;if not valid then just move past it
+	;JMP endthepain
+	
+	inc esi
+	JMP mainLoop
 	
 	;convert the character by adding 32 to it
  convertToLower:
-	mov bl, byte ptr [eax + esi] + 32
+	mov cl, byte ptr [ebx + esi] + 32
+	mov [ebx + esi], cl
+	
+	inc esi
+	JMP mainLoop
  
  ;finish the method
  endthepain:
-	;mov al, esi
-    pop eax
-    ;pop bx
-    pop esi
  
+	;add value into the eax
+	
+	mov eax, ebx
+ 
+	pop esi
+    pop ebx
+	pop ebp
+    
  RET 
  
 String_toLowerCase endp
@@ -119,6 +141,7 @@ finished:
 	pop esi						; restore preserved registers
 	pop ebx
 	pop ebp
+	
 	RET
 String_length endp
 	
