@@ -112,19 +112,25 @@ mov ebp, esp
  
  cmp al[esi], 
  
- mov bl, 91
+ mov bl, 91    ;if less than 91
  JB checkupper
  
  checkupper:
-    cmp bl, 
+    cmp bl, 64			;if greater than 64
+	JA  convertToLower	;go to convert character
+	
+	JMP endthepain
+	
+	;convert the character by adding 32 to it
+ convertToLower:
+	mov bl[esi], bl[esi] + 32
  
  ;finish the method
  endthepain:
- 
- 
-	
- 
- 
+	mov al, esi
+    pop al
+    pop bl
+    pop esi
  
  RET 
  

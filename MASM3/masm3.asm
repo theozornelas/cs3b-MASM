@@ -23,7 +23,7 @@
 		
 		.data
 strAssignmentHeader		byte	13, 10,	9,									
-								"Name:       Arang Christopher Montazer",		
+								"Name:       Osvaldo Moreno Ornelas",		
 								13, 10, 9, 
 								"Program:    MASM2.asm", 
 								13, 10, 9, 
@@ -36,7 +36,7 @@ strAssignmentHeader		byte	13, 10,	9,
 strCRLF					byte	13, 10, 0
 strBackspace			byte	8, 32, 8, 0
 
-strName					byte	"xXPapi_ChuloXx", 0
+strName					byte	"oSvAlDo", 0
 strCount				dword	?
 
 
@@ -49,15 +49,61 @@ _start:
 	INVOKE putstring, ADDR strCRLF
 	
 	push OFFSET strName
-	call String_length
+	call String_toLowerCase
 	
-	INVOKE intasc32, ADDR strCount, EAX
-	INVOKE putstring, ADDR strCount
+	;INVOKE intasc32, ADDR strCount, EAX
+	;INVOKE putstring, ADDR strCount
 	
 
 	INVOKE ExitProcess, 0						; terminates program normally	
 	PUBLIC _start
 
+;+String_toUpperCase(string1:String):String   
+;It converts the string to upper case string
+
+String_toLowerCase proc Near3
+
+push ebp
+mov ebp, esp
+ 
+ push al  ;push string in
+ push bl
+ push esi ;start counter
+ 
+ mov esi, 0			;initialize to zero
+ 
+ mainLoop:
+ 
+ cmp al[esi], 0
+ JE  endthepain
+ 
+ cmp al[esi], 
+ 
+ mov bl, 91    ;if less than 91
+ JB checkupper
+ 
+ checkupper:
+    cmp bl, 64			;if greater than 64
+	JA  convertToLower	;go to convert character
+	
+	JMP endthepain
+	
+	;convert the character by adding 32 to it
+ convertToLower:
+	mov bl[esi], bl[esi] + 32
+ 
+ ;finish the method
+ endthepain:
+	mov al, esi
+    pop al
+    pop bl
+    pop esi
+ 
+ RET 
+ 
+String_toLowerCase
+	
+	
 String_length	proc Near32
 	push ebp					; preserve base register
 	mov ebp,esp					; set new stack frame
