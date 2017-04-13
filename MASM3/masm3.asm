@@ -77,18 +77,19 @@ mov   ebp, esp		;stack frame
  
  mainLoop:
  
- cmp byte ptr [ebx + esi], 91    ;if less than 91 (have to use byte ptr because we are comparing byte vs byte)
- JB checkupper
- 
  cmp ebx, 0			;if there is nothing
  JMP endthepain		;end the procedure
+ 
+ cmp byte ptr [ebx + esi], 91    ;if less than 91 (have to use byte ptr because we are comparing byte vs byte)
+ JB checklowerbound
+ 
  
  ;other wise just move past it to the next character
  
  inc esi						;increment counter
  JMP mainLoop 					;start the comparison again
  
- checkupper:
+ checklowerbound:
     cmp byte ptr [ebx + esi], 64			;if greater than 64
 	JA  convertToLower	;go to convert character
 	
