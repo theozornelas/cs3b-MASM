@@ -36,7 +36,7 @@ strAssignmentHeader		byte	13, 10,	9,
 strCRLF					byte	13, 10, 0
 strBackspace			byte	8, 32, 8, 0
 
-strName					byte	"oSvAlDo", 0
+strName					byte	"OSvAlDo", 0
 strCount				dword	?
 
 
@@ -77,10 +77,12 @@ mov   ebp, esp		;stack frame
  
  mainLoop:
  
- cmp ebx, 0			;if there is nothing
+ ;cmp ebx, 0			;if there is nothing
+ 
+ cmp byte ptr [ebx + esi], 0
  JMP endthepain		;end the procedure
  
- cmp byte ptr [ebx + esi], 91    ;if less than 91 (have to use byte ptr because we are comparing byte vs byte)
+ cmp byte ptr [ebx + esi], 91d    ;if less than 91 (have to use byte ptr because we are comparing byte vs byte)
  JB checklowerbound
  
  
@@ -90,7 +92,7 @@ mov   ebp, esp		;stack frame
  JMP mainLoop 					;start the comparison again
  
  checklowerbound:
-    cmp byte ptr [ebx + esi], 64			;if greater than 64
+    cmp byte ptr [ebx + esi], 64d			;if greater than 64
 	JA  convertToLower	;go to convert character
 	
 	;if not valid then just move past it
