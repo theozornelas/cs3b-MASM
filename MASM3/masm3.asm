@@ -1,6 +1,6 @@
 ;************************************************************************
 ; Program Name:		MASM3.asm
-; Programmers:		Arang Christopher Montazer & Osvaldo Moreno Ornelas
+; Programmers:		Arang Christopher Montazer 
 ; Class: 			CS3B
 ; Date:				3-28-17
 ; 

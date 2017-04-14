@@ -141,7 +141,7 @@ mov ebp, esp
  
  RET 
  
-String_toUpperCase
+String_toUpperCase endp 
 
 
 
