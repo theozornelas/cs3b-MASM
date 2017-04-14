@@ -61,8 +61,8 @@ _start:
 	INVOKE ExitProcess, 0						; terminates program normally	
 	PUBLIC _start
 
-;+String_toUpperCase(string1:String):String   
-;It converts the string to upper case string
+;+String_toLowerCase(string1:String):String  
+;It converts the string to lower case string
 String_toLowerCase proc Near32
 
 push  ebp			;preserve
@@ -80,7 +80,7 @@ mov   ebp, esp		;stack frame
  ;cmp ebx, 0			;if there is nothing
  
  cmp byte ptr [ebx + esi], 0
- JMP endthepain		;end the procedure
+ JE endthepain		;end the procedure
  
  cmp byte ptr [ebx + esi], 91d    ;if less than 91 (have to use byte ptr because we are comparing byte vs byte)
  JB checklowerbound
@@ -103,7 +103,8 @@ mov   ebp, esp		;stack frame
 	
 	;convert the character by adding 32 to it
  convertToLower:
-	mov cl, byte ptr [ebx + esi] + 32
+	mov cl, [ebx + esi]
+	add cl, 32
 	mov [ebx + esi], cl
 	
 	inc esi

@@ -1,10 +1,13 @@
+
+;+String_indexOf_1(string1:String,ch:char):int  
 String_indexOf_1  proc Near32
 push ebp        ;preserve space
 mov ebp, esp
-push eax        ;character
-push ebx        ;string
+;push eax        ;character
+push ebx        ;push string
+push ecx		;push character
 push esi
-mov ebx,[ebp+12]
+mov ebx,[ebp+8]
 mov esi, 0
 
 mainLoop:
@@ -32,6 +35,8 @@ String_indexOf_1 endp
 
 ;start of the second method
 
+
+;+String_indexOf_2(string1:String,ch:char,fromIndex:int):int   
 String_indexOf_2 proc Near32
     push ebp
     mov ebp, esp
@@ -91,10 +96,12 @@ String_indexOf_3 endp
 ;+String_toLowerCase(string1:String):String  
 ;It converts the string to lower case string
 
+
+
 ;+String_toUpperCase(string1:String):String   
 ;It converts the string to upper case string
 
-String_toLowerCase proc Near3
+String_toUpperCase proc Near32
 
 push ebp
 mov ebp, esp
@@ -134,7 +141,7 @@ mov ebp, esp
  
  RET 
  
-String_toLowerCase
+String_toUpperCase
 
 
 
