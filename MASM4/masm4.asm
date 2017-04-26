@@ -60,7 +60,7 @@
 									13, 10, 13, 10, 0
 		
 		
-	strCRLF					byte	13, 10, 0
+	crlf					byte	13, 10, 0
 	strBackspace			byte	8, 32, 8, 0
 
 	D_MAX_STRING_LEN = 32
@@ -213,10 +213,24 @@
 	
 	
 	;Main menu for the user
-	strUserMenu   			byte	"*************************************", 13, 10,
-									"* <1>        View all Strings       *", 13, 10,
-									"* <2>        Add String             *", 13, 10,
-									"*************************************", 13, 10, 0
+	strUserMenuTop   			byte	"***************************************", 13, 10,
+										"*           PROGRAM OPTIONS           *", 13, 10,
+										"***************************************", 13, 10,0
+	strUserMenuOption1   		byte	"* <1> View all Strings                *", 13, 10,0
+	strUserMenuOption2   		byte    "* <2> Add String                      *", 13, 10,0
+	strUserMenuOption3   		byte	"* <3> Delete String                   *", 13, 10,0
+	strUserMenuOption4   		byte	"* <4> Edit String                     *", 13, 10,0
+	strUserMenuOption5   		byte	"* <5> String Search                   *", 13, 10,0
+	strUserMenuOption6   		byte	"* <6> String Array Memory Consuption  *", 13, 10,0
+	strUserMenuOption7   		byte	"* <7> Quit                            *", 13, 10,0
+	strUserMenuBottom 			byte	"***************************************", 13, 10, 
+										"Enter your choice:  ", 0
+										
+	strInvalidInput     		byte	"Invalid input. You must input a number between 1 and 7", 13, 10,0	
+	strValidInput     			byte	"Valid input mah niBBa", 13, 10,0		
+	
+	strChoice					byte 11 dup(?)
+	dChoice						dword  3d
 	
 		.code
 _start:
@@ -224,9 +238,50 @@ _start:
 
 	INVOKE putstring, ADDR strAssignmentHeader	; outputs assignment header
 	
-	INVOKE putstring, ADDR strCRLF
+	;INVOKE putstring, ADDR strCRLF
+	
+beginning:
 
-	INVOKE putstring, ADDR strUserMenu
+	INVOKE putstring, ADDR crlf
+	INVOKE putstring, ADDR strUserMenuTop
+	INVOKE putstring, ADDR strUserMenuOption1
+	INVOKE putstring, ADDR strUserMenuOption2
+	INVOKE putstring, ADDR strUserMenuOption3
+	INVOKE putstring, ADDR strUserMenuOption4
+	INVOKE putstring, ADDR strUserMenuOption5
+	INVOKE putstring, ADDR strUserMenuOption6
+	INVOKE putstring, ADDR strUserMenuOption7
+	INVOKE putstring, ADDR strUserMenuBottom
+	
+	;INVOKE getstring, ADDR strChoice, 32
+	;INVOKE ascint32,  ADDR strChoice
+	;mov dChoice, eax
+	
+	push dChoice
+	call dwordErrorCheck
+	add esp, 4
+	
+	
+	cmp eax, -1
+	JE  invalidMessage
+
+	JMP issavalid
+
+	;more stuff to come in this section
+
+
+invalidMessage:
+	INVOKE putstring, ADDR crlf
+	INVOKE putstring, ADDR strInvalidInput
+	JMP beginning
+	
+issavalid:
+
+	INVOKE putstring, ADDR crlf
+	INVOKE putstring, ADDR strValidInput
+	JMP beginning
+	
+	
 	
 ;**********************END OF TESTING**********************
 	
@@ -234,8 +289,41 @@ _start:
 	
 	PUBLIC _start
 
+;**********************************************************
+;This procedure is to error check the user option
+;**********************************************************
+dwordErrorCheck PROC Near32
+
+	push ebp
+	mov ebp, esp
+	push ebx
 	
 	
+	mov ebx, [ebp + 8]	;the dword into the ebx
+	
+;if greater than 0	
+checkLower:
+	cmp ebx, 0
+	JA checkupper
+	
+	JMP invalid
+	
+;if less than 8
+checkupper:
+	cmp ebx, 8
+	JB  endthepain
+	
+	
+invalid:
+	mov ebx, -1
+	
+	
+endthepain:
+	mov eax, ebx
+	pop ebx
+	pop ebp
+
+dwordErrorCheck endp
 	
 	
 ;	+String_length(string1:String):int
