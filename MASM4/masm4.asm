@@ -85,9 +85,64 @@ beginning:
 	cmp eax, -1
 	JE  invalidMessage
 
-	JMP issavalid
-
+	cmp eax, 7
+	JE endprogram
+	
+	cmp eax, 1
+	JE  viewAll
+	
+	cmp eax, 2
+	JE  addString
+	
+	cmp eax, 3
+	JE deleteString
+	
+	cmp eax, 4
+	JE editString
+	
+	cmp eax, 5
+	JE stringSearch
+	
+	cmp eax, 6
+	JE memoryConsuuption
+	
 	;more stuff to come in this section
+	
+viewAll:
+	
+	mWrite "Displaying all Strings: "
+	call Crlf
+	JMP beginning
+	
+addString:
+	
+	mWrite "Enter a new String: "
+	call Crlf
+	JMP beginning
+	
+deleteString:
+	
+	mWrite "What string you want to delete? "
+	call Crlf
+	JMP beginning
+	
+editString:
+	
+	mWrite "What string you want to edit? "
+	call Crlf
+	JMP beginning
+	
+stringSearch:
+	
+	mWrite "What string you want to search? "
+	call Crlf
+	JMP beginning
+	
+memoryConsuuption:
+	
+	mWrite "The memory consumption is currently: "
+	call Crlf
+	JMP beginning
 
 
 invalidMessage:
@@ -106,8 +161,12 @@ issavalid:
 	
 	;225 if else 
 	
+endprogram:
+	call Crlf
+	mWrite "Thank You, have an average day!"
 	
 ;**********************END OF TESTING**********************
+
 	
 	INVOKE ExitProcess, 0						; terminates program normally	
 	
