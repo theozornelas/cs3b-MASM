@@ -110,36 +110,42 @@ beginning:
 	
 viewAll:
 	
+	call Crlf
 	mWrite "Displaying all Strings: "
 	call Crlf
 	JMP beginning
 	
 addString:
 	
+	call Crlf
 	mWrite "Enter a new String: "
 	call Crlf
 	JMP beginning
 	
 deleteString:
 	
+	call Crlf
 	mWrite "What string you want to delete? "
 	call Crlf
 	JMP beginning
 	
 editString:
 	
+	call Crlf
 	mWrite "What string you want to edit? "
 	call Crlf
 	JMP beginning
 	
 stringSearch:
 	
+	call Crlf
 	mWrite "What string you want to search? "
 	call Crlf
 	JMP beginning
 	
 memoryConsuuption:
 	
+	call Crlf
 	mWrite "The memory consumption is currently: "
 	call Crlf
 	JMP beginning
@@ -165,13 +171,38 @@ endprogram:
 	call Crlf
 	mWrite "Thank You, have an average day!"
 	
-;**********************END OF TESTING**********************
+;**********************END OF MAIN**********************
 
 	
 	INVOKE ExitProcess, 0						; terminates program normally	
 	
 	PUBLIC _start
 
+;**********************************************************
+;This procedure is to error check the user option
+;**********************************************************
+Display_Array PROC Near32
+	push ebp		
+	mov ebp, esp
+
+	push ebx				;stores the array
+	push esi 				;counter
+	
+	mov ebx, [ebp + 8]
+	mov esi, 0
+	
+	
+	mWrite "String "
+	;push esi
+	
+	
+	
+
+
+Display_Array endp	
+	
+	
+	
 ;**********************************************************
 ;This procedure is to error check the user option
 ;**********************************************************
@@ -261,7 +292,6 @@ output_menu PROC Near32
 	mWrite	"***************************************"
 	call Crlf
 	mWrite  "Enter your choice:  "
-	call Crlf
 
 	RET
 output_menu endp
