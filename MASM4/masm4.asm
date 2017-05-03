@@ -102,7 +102,7 @@ issavalid:
 	call Crlf
 	mWrite "Valid Data Inputted"
 	;call Clrscr
-	;JMP beginning
+	JMP beginning
 	
 	;225 if else 
 	
