@@ -68,6 +68,10 @@
 _start:
 	mov EAX, 0									; ensures first instruction can be executed in Ollydbg
 
+	;Here we change the console color
+
+
+	
 	call output_header
 beginning:
 	;call Clrscr
@@ -192,16 +196,18 @@ Display_Array PROC Near32
 	mov esi, 0
 	
 	
-	mWrite "String "
+	mWrite "String #: "
 	;push esi
-	
-	
-	
 
+endProc:
+
+	pop esi
+	pop ebx
+	pop ebp
+
+	RET
 
 Display_Array endp	
-	
-	
 	
 ;**********************************************************
 ;This procedure is to error check the user option
@@ -241,8 +247,9 @@ endthepain:
 	
 dwordErrorCheck endp
 	
-	
-;	+String_length(string1:String):int
+;**********************************************************
+;+String_length(string1:String):int
+;**********************************************************
 String_length	PROC Near32
 	push ebp					; preserve base register
 	mov  ebp,esp				; set new stack frame
@@ -265,7 +272,9 @@ finished:
 	RET
 String_length ENDP
 
-
+;**********************************************************
+;This procedure outputs the user menu to the console
+;**********************************************************
 output_menu PROC Near32
 
 	call Crlf
