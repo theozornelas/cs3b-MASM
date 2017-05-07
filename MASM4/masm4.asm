@@ -10,8 +10,6 @@
 ;************************************************************************
 
 		.486
-
-		
 		
 		INCLUDE Irvine32.inc
 		INCLUDE macros.inc
@@ -183,6 +181,11 @@ endprogram:
 	PUBLIC _start
 
 ;**********************************************************
+;The following procedures are used to do the required
+;operations for this assignment
+;**********************************************************
+	
+;**********************************************************
 ;This procedure is to error check the user option
 ;**********************************************************
 Display_Array PROC Near32
@@ -208,7 +211,29 @@ endProc:
 	RET
 
 Display_Array endp	
+
+;**********************************************************
+;This procedure is to add a string to the array
+;**********************************************************	
+Add_String PROC Near32
+
+
+
+Add_String endp
+
+;**********************************************************
+;This procedure is to delete a string to the array
+;**********************************************************	
+Delete_String PROC Near32
+
+
+Delete_String endp
 	
+;**********************************************************
+;The following procedures are used to add a user interface
+;that allows the user to use the program with ease.
+;**********************************************************	
+
 ;**********************************************************
 ;This procedure is to error check the user option
 ;**********************************************************
