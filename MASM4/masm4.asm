@@ -211,7 +211,7 @@ Display_Array PROC Near32
 	
 	
 	mWrite "String #: "
-	;push esi
+	;esi
 
 endProc:
 
@@ -231,17 +231,44 @@ Add_String PROC Near32
 	push ebp		
 	mov ebp, esp
 
-	push ebx				;reserve the esp register
+	push ebx				;reserve the ebx register
+	push ecx
+	push edx
 	push esi 				;reserve the esi register
 	
-	mov ebx, [ebp + 8]		;points to the first thing in the stack, in this case is the string to be added
+	mov ebx, [ebp + 8]		;points to the first thing in the stack, in this case is the array
+	mov ecx, [ebp + 12]		;points to the second thing in the stack, in this case is the string to add
 	mov esi, 0				;initialize esi to zero
+	
+	.IF ebx == 0				;array is empty
+		;then add first index
+		mov [ebx + esi], ecx
+		JMP endProcedure
+	.ELSE
+		JMP findSpot
+	
 	
 	;find the correct spot to add the string into
 findSpot:
+	push ebx
+	call First_Empty
+	add esp, 4
 	
-
-
+	mov edx, eax
+	
+	;this moves the content?
+	mov[ebx + edx], ecx
+	
+	
+endProcedure:
+	pop esi
+	pop edx
+	pop ecx
+	pop ebx
+	pop ebp
+	
+	RET
+	
 Add_String endp
 
 ;**********************************************************
@@ -249,8 +276,159 @@ Add_String endp
 ;**********************************************************	
 Delete_String PROC Near32
 
+	push ebp		
+	mov ebp, esp
 
+	push ebx				;reserve the ebx register		
+	push esi
+	
+	mov ebx, [esp + 8]      ;number to delete
+	
+	mov esi, 128 * ebx		;valid?
+	
+	deleteLoop:
+		mov ebx[esi], 0
+		
+		.IF esi < 128 * [ebx + 1]
+			inc esi
+		.ELSE
+		    JE endProcedure
+		
+		.ENDIF
+		
+		
+	JMP deleteLoop
+	
+	endProcedure:
+		pop esi
+		pop ebx
+		pop ebp
+		
+		
+	RET
+	
 Delete_String endp
+
+
+;**********************************************************
+;Modify a string in the array
+;**********************************************************
+String_Edit Proc Near32
+	push ebp		
+	mov ebp, esp
+	
+	push ebx
+	push ecx
+	push esi
+	
+	mov ebx, [esp+8]		;string number
+	mov esi ,0
+	
+	mov ecx, ebx*128
+	
+	
+	
+	
+	
+
+
+
+String_Edit endp
+
+;**********************************************************
+;Get the number of instances of a word
+;**********************************************************
+String_Search Proc Near32
+	push ebp
+	mov ebp, esp
+	
+	; push ebx 
+	; push ecx
+	; push esi
+	; push edi
+	; ;make counter for times found
+	
+	; mov ebx, [ebp + 8]
+	; mov ecx, [ebp + 12]
+	
+	; mov esi, 0
+	; mov edi, 0
+	
+ ; search:
+ 
+	; cmp ebx, 0			;if empty
+	; JE  emptyArray
+	
+	; cmp [ebx + esi], 0
+	; JE search
+	; ;inc esi
+	
+	; cmp esi, 1280
+	; JE emptyArray
+	
+; lookForward:
+	
+	; ;.IF is for run time, normal IF is for compile time
+	; .IF [ebx + esi] == [ecx + edi]
+		; inc edi
+		; ;.IF edi == size of string passed in, found
+		; ;inc esi (after is been reset to zero)
+	
+	; ;cmp edi, lenght of word
+	; ;JE endProcedure
+	
+	
+	
+	
+	
+ ; emptyArray:
+	; mov esi, -1 
+
+; endProcedure:
+	; mov eax, esi
+	
+	; pop edi
+	; pop esi
+	; pop ebx
+	; pop ebp
+
+	RET
+	
+String_Search endp
+
+;**********************************************************
+;Get the first empty spot  (array) (returns an address)
+;**********************************************************
+First_Empty Proc Near32
+	push ebp
+	mov  ebp, esp
+	push ebx
+	push esi
+	
+	mov ebx, [esp + 8]
+	mov esi, 0
+	
+	search:
+	.IF [ebx+esi] != 0 && esi <1280
+		add esi, 127
+		JMP search
+	.ELSE
+		JMP endProcedure
+	
+notFound:
+	mov esi, -1
+	
+	
+endProcedure:
+	mov eax, esi
+	
+	pop esi
+	pop ebx
+	pop ebp
+	
+	RET
+	
+First_Empty endp
 	
 ;**********************************************************
 ;The following procedures are used to add a user interface
