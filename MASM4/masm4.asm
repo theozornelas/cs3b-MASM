@@ -11,6 +11,7 @@
 
 		.486
 		
+		;include macros and external libraries
 		INCLUDE Irvine32.inc
 		INCLUDE macros.inc
 		includelib Irvine32.lib
@@ -54,62 +55,65 @@
 		
 		.data
 
-	D_MAX_STRING_LEN = 32
+	D_MAX_STRING_LEN = 32		;max lenght for a string
 
 	
 	strChoice					byte 11 dup(?)
 	dChoice						dword  ?
 	
-	bWordArray					byte 1280 dup(?)
+	bWordArray					byte 1280 dup(?)				;array of contents
 	
 		.code
 _start:
 	mov EAX, 0									; ensures first instruction can be executed in Ollydbg
 
 	;Here we change the console color
-
-
+	mov AX, green								;add color to the eax
+	push AX										;push the register AX
+	call setTextColor							;call the propcedure from the external libraries
+	add esp, 2 									;add 2 bytes to the esp 
 	
-	call output_header
+	call output_header							;ouput the class header
 beginning:
-	;call Clrscr
+						
+	call output_menu							;output the user menu
 	
-	call output_menu
-	
-	INVOKE getstring, ADDR strChoice, 32
-	INVOKE ascint32,  ADDR strChoice
+	INVOKE getstring, ADDR strChoice, 32		;get the user's choice from the menu
+	INVOKE ascint32,  ADDR strChoice			;conver to in from ascii
 	mov dChoice, eax
 	
 	push dChoice
-	call dwordErrorCheck
+	call dwordErrorCheck						;check if the user inputted a valid option
 	add esp, 4
 	
-	cmp eax, -1
-	JE  invalidMessage
+	cmp eax, -1									;if the returned value is -1, then the input was invalid 
+	JE  invalidMessage							;so we jump to invalidMessage label
 
-	cmp eax, 7
+	cmp eax, 7									;if the input is 7, we terminate the prgram
 	JE endprogram
 	
-	cmp eax, 1
+	cmp eax, 1									;if the input is one, then we view all the strings inside the array
 	JE  viewAll
 	
-	cmp eax, 2
+	cmp eax, 2									;if the input is 2, then we go to the label where we promped the user for a string to add
 	JE  addString
 	
-	cmp eax, 3
+	cmp eax, 3									;if the input is 3, then we go to the label where we promped the user for a string to delete
 	JE deleteString
 	
-	cmp eax, 4
+	cmp eax, 4									;if the input is 4, then we go to the label where we promped the user for a string to edit
 	JE editString
 	
-	cmp eax, 5
+	cmp eax, 5									;if the input is 5, then we go to the label where we promped the user for a string to search
 	JE stringSearch
 	
-	cmp eax, 6
+	cmp eax, 6									;if the input is 6, then we go to the label where we show the user the current memory consumption
 	JE memoryConsuuption
-	
-	;more stuff to come in this section
-	
+
+;*****************************************************************
+;here are the labels to prompt the user and display the desired
+;operations from the menu
+;*****************************************************************	
 viewAll:
 	
 	call Crlf
@@ -173,6 +177,13 @@ endprogram:
 	call Crlf
 	mWrite "Thank You, have an average day!"
 	
+	
+	;reset the command window color
+	mov AX, lightGray
+	push AX
+	call setTextColor
+	add esp, 2 
+	
 ;**********************END OF MAIN**********************
 
 	
@@ -217,6 +228,18 @@ Display_Array endp
 ;**********************************************************	
 Add_String PROC Near32
 
+	push ebp		
+	mov ebp, esp
+
+	push ebx				;reserve the esp register
+	push esi 				;reserve the esi register
+	
+	mov ebx, [ebp + 8]		;points to the first thing in the stack, in this case is the string to be added
+	mov esi, 0				;initialize esi to zero
+	
+	;find the correct spot to add the string into
+findSpot:
+	
 
 
 Add_String endp
