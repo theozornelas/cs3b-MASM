@@ -63,6 +63,8 @@
 	
 	bWordArray					byte 1280 dup(?)				;array of contents
 	
+	strAddString				byte 128 dup(?)
+	
 		.code
 _start:
 	mov EAX, 0									; ensures first instruction can be executed in Ollydbg
@@ -119,13 +121,23 @@ viewAll:
 	call Crlf
 	mWrite "Displaying all Strings: "
 	call Crlf
+	push offset bWordArray
+	call Display_Array
+	add esp, 4
 	JMP beginning
 	
 addString:
 	
 	call Crlf
 	mWrite "Enter a new String: "
-	call Crlf
+	
+	INVOKE getstring, ADDR strAddString, 128
+	
+	push offset strAddString		;push word to add
+	push offset bWordArray			;push the array 
+	call Add_String
+	add esp, 8
+	
 	JMP beginning
 	
 deleteString:
@@ -205,13 +217,26 @@ Display_Array PROC Near32
 
 	push ebx				;stores the array
 	push esi 				;counter
+	push edi				;used to loop through the section
 	
 	mov ebx, [ebp + 8]
 	mov esi, 0
+	mov edi, 0
 	
-	
-	mWrite "String #: "
-	;esi
+	loopBack:
+		.IF esi < 10
+			inc esi
+			mWrite "String #: "
+			;WriteDec esi
+			
+			displayChar:
+				
+			
+			call Crlf
+		.ELSE
+			JMP endProc
+		.ENDIF
+	JMP loopBack
 
 endProc:
 
@@ -246,6 +271,8 @@ Add_String PROC Near32
 		JMP endProcedure
 	.ELSE
 		JMP findSpot
+		
+	.ENDIF
 	
 	
 	;find the correct spot to add the string into
@@ -279,30 +306,30 @@ Delete_String PROC Near32
 	push ebp		
 	mov ebp, esp
 
-	push ebx				;reserve the ebx register		
-	push esi
+	; push ebx				;reserve the ebx register		
+	; push esi
 	
-	mov ebx, [esp + 8]      ;number to delete
+	; mov ebx, [esp + 8]      ;number to delete
 	
-	mov esi, 128 * ebx		;valid?
+	; mov esi, [ebx] * 128 		;valid?
 	
-	deleteLoop:
-		mov ebx[esi], 0
+	; deleteLoop:
+		; mov ebx[esi], 0
 		
-		.IF esi < 128 * [ebx + 1]
-			inc esi
-		.ELSE
-		    JE endProcedure
+		; .IF esi < 128 * [ebx + 1]
+			; inc esi
+		; .ELSE
+		    ; JE endProcedure
 		
-		.ENDIF
+		; .ENDIF
 		
 		
-	JMP deleteLoop
+	; JMP deleteLoop
 	
-	endProcedure:
-		pop esi
-		pop ebx
-		pop ebp
+	; endProcedure:
+		; pop esi
+		; pop ebx
+		; pop ebp
 		
 		
 	RET
@@ -315,82 +342,114 @@ Delete_String endp
 ;**********************************************************
 String_Edit Proc Near32
 	push ebp		
-	mov ebp, esp
+	mov  ebp, esp
 	
-	push ebx
-	push ecx
-	push esi
+	; push ebx
+	; push ecx
+	; push edx				;current position
+	; push esi
 	
-	mov ebx, [esp+8]		;string number
-	mov esi ,0
+	; mov ebx, [esp+8]		;string number
+	; mov ecx, [esp+8]		;string to replace with
+	; mov esi ,0
 	
-	mov ecx, ebx*128
+	; mov edx, ebx * 128
+	
+	; .IF [ebx + edx] != 0
+		; ;replace
+		
+		; loopBack:
+			; mov [ebx + edx], [ecx + esi]
+			; inc edi
+			; inc esi
+			; ;if the esi is the same as string size, go to clear everything else
+		; JMP loopBack
+		; ;call string replace
+		; JMP endProcedure
+		
+	; .ELSE
+		; JMP empty
+	; .ENDIF
 	
 	
+	; clearAll:
+		; ;go to current address and clear until (ebx * 128) + 128
+		
+		; mov [ebx + edx],0
+		; cmp edi, ebx+1 * 128
+		; JE endProcedure
+		
+		; JMP clearAll
 	
+	; empty:
+		; mWrite "The spot is empty, cannot replace the string"
+		
+	; endProcedure:
 	
+	 ; pop esi
+	 ; pop edx
+	 ; pop ecx
+	 ; pop ebx
+	 ; pop ebp
 	
-
-
-
+	RET
+	
 String_Edit endp
 
 ;**********************************************************
-;Get the number of instances of a word
+;This procedure replaces a string
+;**********************************************************
+
+;**********************************************************
+;Get the number of instances of a word (array, word)
 ;**********************************************************
 String_Search Proc Near32
 	push ebp
 	mov ebp, esp
 	
-	; push ebx 
-	; push ecx
-	; push esi
-	; push edi
-	; ;make counter for times found
+	push ebx 
+	push ecx
+	push esi
+	push edi
+	;make counter for times found
 	
-	; mov ebx, [ebp + 8]
-	; mov ecx, [ebp + 12]
+	mov ebx, [ebp + 8]    ;array
+	mov ecx, [ebp + 12]	  ;word
 	
-	; mov esi, 0
-	; mov edi, 0
+	mov esi, 0
+	mov edi, 0
 	
- ; search:
+ search:
  
-	; cmp ebx, 0			;if empty
-	; JE  emptyArray
+	cmp ebx, 0			;if empty
+	JE  emptyArray
 	
-	; cmp [ebx + esi], 0
-	; JE search
-	; ;inc esi
+	cmp byte ptr[ebx + esi], 0
+	JE search
+	;inc esi
 	
 	; cmp esi, 1280
 	; JE emptyArray
 	
-; lookForward:
-	
-	; ;.IF is for run time, normal IF is for compile time
-	; .IF [ebx + esi] == [ecx + edi]
-		; inc edi
-		; ;.IF edi == size of string passed in, found
-		; ;inc esi (after is been reset to zero)
-	
-	; ;cmp edi, lenght of word
-	; ;JE endProcedure
-	
-	
-	
-	
-	
- ; emptyArray:
-	; mov esi, -1 
+lookForward:
 
-; endProcedure:
-	; mov eax, esi
+	mov esi,0		;number of times found
 	
-	; pop edi
-	; pop esi
-	; pop ebx
-	; pop ebp
+	;do a character match algorithm
+	;if all the characters match, add 1 to the esi, and keep looking
+	
+
+	
+ emptyArray:
+	mov esi, -1 
+
+endProcedure:
+	mov eax, esi
+	
+	pop edi
+	pop esi
+	pop ebx
+	pop ebp
 
 	RET
 	
@@ -409,11 +468,13 @@ First_Empty Proc Near32
 	mov esi, 0
 	
 	search:
-	.IF [ebx+esi] != 0 && esi <1280
+	.IF byte ptr[ebx+esi] != 0 && esi <1280
 		add esi, 127
 		JMP search
 	.ELSE
 		JMP endProcedure
+		
+	.ENDIF
 	
 notFound:
 	mov esi, -1
