@@ -64,6 +64,9 @@
 	bWordArray					byte 1280 dup(?)				;array of contents
 	
 	strAddString				byte 128 dup(?)
+	strDeleteString				byte 128 dup(?)
+	strSearchString				byte 128 dup(?)
+	strEditString				byte 128 dup(?)
 	
 		.code
 _start:
@@ -144,6 +147,7 @@ deleteString:
 	
 	call Crlf
 	mWrite "What string you want to delete? "
+	INVOKE getstring, ADDR strDeleteString, 128
 	call Crlf
 	JMP beginning
 	
@@ -151,6 +155,7 @@ editString:
 	
 	call Crlf
 	mWrite "What string you want to edit? "
+	INVOKE getstring, ADDR strEditString, 128
 	call Crlf
 	JMP beginning
 	
@@ -158,6 +163,7 @@ stringSearch:
 	
 	call Crlf
 	mWrite "What string you want to search? "
+	INVOKE getstring, ADDR strSearchString, 128
 	call Crlf
 	JMP beginning
 	
@@ -209,6 +215,76 @@ endprogram:
 ;**********************************************************
 	
 ;**********************************************************
+;Check for an empty spot as in a switch statement
+;**********************************************************
+Check_Spot Proc Near32
+	push ebp		
+	mov ebp, esp
+	push ebx
+	push ecx
+	push esi
+	
+	mov esi, 0
+	
+	mov ebx, [esp+8]		;number
+	mov ecx, [esp+12]		;array
+	
+	
+	.IF ebx == 1
+		cmp byte ptr[ecx[ebx]], 0
+		JE emptySpot
+	.ELSEIF ebx == 2
+		cmp byte ptr[ecx[128]], 0
+		JE emptySpot
+	.ELSEIF ebx == 3
+		cmp byte ptr[ecx[256]], 0
+		JE emptySpot
+	.ELSEIF ebx == 4
+		cmp byte ptr[ecx[384]], 0
+		JE emptySpot
+	.ELSEIF ebx == 5
+		cmp byte ptr[ecx[512]], 0
+		JE emptySpot
+	.ELSEIF ebx == 6
+		cmp byte ptr[ecx[640]], 0
+		JE emptySpot
+	.ELSEIF ebx == 7
+		cmp byte ptr[ecx[768]], 0
+		JE emptySpot
+	.ELSEIF ebx == 8
+		cmp byte ptr[ecx[896]], 0
+		JE emptySpot
+	.ELSEIF ebx == 9
+		cmp byte ptr[ecx[1024]], 0
+		JE emptySpot
+	.ELSEIF ebx == 9
+		cmp byte ptr[ecx[1152]], 0
+		JE emptySpot
+	.ELSE
+		JMP notEmpty
+		
+	.ENDIF
+
+	emptySpot:
+		mov esi, -1
+		JMP endProcedure
+		
+	notEmpty:
+		mov esi, 1
+		
+	endProcedure:
+		mov eax, esi
+	
+		pop esi
+		pop ecx
+		pop ebx
+		pop ebp
+	
+		RET
+	
+Check_Spot endp
+	
+;**********************************************************
 ;This procedure is to error check the user option
 ;**********************************************************
 Display_Array PROC Near32
@@ -223,13 +299,16 @@ Display_Array PROC Near32
 	mov esi, 0
 	mov edi, 0
 	
+	;make local variable for display?
+	
 	loopBack:
 		.IF esi < 10
 			inc esi
 			mWrite "String #: "
+		
 			;WriteDec esi
 			
-			displayChar:
+			;displayChar:
 				
 			
 			call Crlf
@@ -240,6 +319,7 @@ Display_Array PROC Near32
 
 endProc:
 
+	pop edi
 	pop esi
 	pop ebx
 	pop ebp
