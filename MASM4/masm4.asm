@@ -257,7 +257,7 @@ Check_Spot Proc Near32
 	.ELSEIF ebx == 9
 		cmp byte ptr[ecx[1024]], 0
 		JE emptySpot
-	.ELSEIF ebx == 9
+	.ELSEIF ebx == 10
 		cmp byte ptr[ecx[1152]], 0
 		JE emptySpot
 	.ELSE
@@ -294,6 +294,7 @@ Display_Array PROC Near32
 	push ebx				;stores the array
 	push esi 				;counter
 	push edi				;used to loop through the section
+	push ecx				;stores the current max	
 	
 	mov ebx, [ebp + 8]
 	mov esi, 0
@@ -305,10 +306,29 @@ Display_Array PROC Near32
 		.IF esi < 10
 			inc esi
 			mWrite "String #: "
-		
 			;WriteDec esi
 			
-			;displayChar:
+			.IF ebx == 0
+				mWrite "vacio"
+				JMP loopBack
+			
+			.ENDIF
+			
+			
+			mov eax, esi
+			add eax, 30h
+			
+			INVOKE putch, al
+			
+			displayChar:
+			
+			cmp edi, 1280
+			JE  loopBack
+			INVOKE putstring, [ebx +esi]
+			
+			inc esi
+			add edi, 128
+			JMP displayChar
 				
 			
 			call Crlf
@@ -318,7 +338,7 @@ Display_Array PROC Near32
 	JMP loopBack
 
 endProc:
-
+	pop ecx
 	pop edi
 	pop esi
 	pop ebx
