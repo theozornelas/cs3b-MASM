@@ -61,15 +61,15 @@
 	strChoice					byte 11 dup(?)
 	dChoice						dword  ?
 	
-	bWordArray					byte 1280 dup(?)				;array of contents
+	bWordArray					byte 1280 dup(?)					;array of contents
+	dWordArray					dword 128 dup(10)					;array of 10 dwords
 	
-	strAddString				byte 128 dup(?)
-	strDeleteString				byte 128 dup(?)
-	strSearchString				byte 128 dup(?)
-	strEditString				byte 128 dup(?)
+	strAddString				byte 128 dup(?)						;stores the striing to be added
+	strDeleteString				byte 128 dup(?)						;stores the string number to be deleted
+	strSearchString				byte 128 dup(?)						;stores the string to be searched
+	strEditString				byte 128 dup(?)						;stores the number of the string to be edited
 	
-	strMemoryConsumed			byte 3000 dup(?)
-	
+	strMemoryConsumed			byte 3000 dup(?)					;stores the amount of memory consumed
 		.code
 _start:
 	mov EAX, 0									; ensures first instruction can be executed in Ollydbg
@@ -373,27 +373,30 @@ Display_Array PROC Near32
 			;display character label
 			displayChar:
 			
-				.IF byte ptr[ebx + edi] == 0	;if the spot is empty
-					mWrite "  <Empty Spot>"		;write empty spot
-					call Crlf					;newline
-					add edi, 128				;add 128 (go forward 128)
-					JMP loopBack				;loop in the next sector
-				
-				.ENDIF
+			.IF byte ptr[ebx + edi] == 0	;if the spot is empty
+				mWrite "  <Empty Spot>"		;write empty spot
+				call Crlf					;newline
+				add edi, 128				;add 128 (go forward 128)
+				JMP loopBack				;loop in the next sector
 			
-			mWrite "  "
-			INVOKE putstring, [ebx +edi]	    ;else output the contents
-			call Crlf	
-			;inc esi								;increment the index
-			add edi, 128						;advance 128 characters
+			.ELSE							;else is not empty
+			
+				mWrite "  "
+				INVOKE putstring, [ebx +edi]	    ;else output the contents
+				call Crlf	
+				;inc esi								;increment the index
+				add edi, 128						;advance 128 characters
 
-			JMP loopBack						;go back to the loop
+				JMP loopBack						;go back to the loop
+					
+				call Crlf							;newline
 				
-			call Crlf							;newline
+			.ENDIF								;end nested if else
 		.ELSE
 			JMP endProc							;if is the end of the array, escape
-		.ENDIF
-	JMP loopBack
+		.ENDIF									;end outer ifelse statement
+	
+	JMP loopBack								;start over
 
 endProc:
 	pop ecx
@@ -414,10 +417,10 @@ Add_String PROC Near32
 	push ebp		
 	mov ebp, esp
 
-	push ebx				;reserve the ebx register
-	push ecx				;reserve the ecx register
-	push edx				;reserve the edx register
-	push esi 				;reserve the esi register
+	push ebx					;reserve the ebx register
+	push ecx					;reserve the ecx register
+	push edx					;reserve the edx register
+	push esi 					;reserve the esi register
 	
 	mov ebx, offset bWordArray	;points to the first thing in the stack, in this case is the array
 	mov ecx, [ebp + 8]		    ;points to the second thing in the stack, in this case is the string to add
@@ -466,30 +469,30 @@ Delete_String PROC Near32
 	push ebp		
 	mov ebp, esp
 
-	; push ebx				;reserve the ebx register		
-	; push esi
+	push ebx					;reserve the ebx register	
+	push ecx					;reserve the ebx register
+	push esi
 	
-	; mov ebx, [esp + 8]      ;number to delete
+	mov ebx, offset bWordArray	;allocate the array into the ebx
+	mov ecx, [esp + 8]      	;number to delete
 	
-	; mov esi, [ebx] * 128 		;valid?
+	;get the start points
+	;get the end points
+	;while counter is within those boundaries
+	;replace the value with zeroes
+	;end the program
 	
-	; deleteLoop:
-		; mov ebx[esi], 0
+	deleteLoop:
+		mov dl, 0
+		mov [ebx + esi], dl
 		
-		; .IF esi < 128 * [ebx + 1]
-			; inc esi
-		; .ELSE
-		    ; JE endProcedure
-		
-		; .ENDIF
-		
-		
-	; JMP deleteLoop
+	JMP deleteLoop
 	
-	; endProcedure:
-		; pop esi
-		; pop ebx
-		; pop ebp
+	endProcedure:
+		pop esi
+		pop ecx
+		pop ebx
+		pop ebp
 		
 		
 	RET
@@ -515,7 +518,7 @@ Check_Memory Proc Near32
 loopStart:
 
 	;if the counter reaches 1280(the end of the array)
-	cmp esi,1200
+	cmp esi,1280
 	JE endProcedure
 
 	.IF byte ptr[ebx+esi] == 0		;if the content at that byte is null (0)
@@ -547,14 +550,14 @@ String_Edit Proc Near32
 	push ebp		
 	mov  ebp, esp
 	
-	; push ebx
-	; push ecx
-	; push edx				;current position
-	; push esi
+	push ebx
+	push ecx
+	push edx				;current position
+	push esi
 	
-	; mov ebx, [esp+8]		;string number
-	; mov ecx, [esp+8]		;string to replace with
-	; mov esi ,0
+	mov ebx, [esp+8]		;string number
+	mov ecx, [esp+8]		;string to replace with
+	mov esi ,0
 	
 	; mov edx, ebx * 128
 	
@@ -584,16 +587,16 @@ String_Edit Proc Near32
 		
 		; JMP clearAll
 	
-	; empty:
-		; mWrite "The spot is empty, cannot replace the string"
+	empty:
+		mWrite "The spot is empty, cannot replace the string"
 		
-	; endProcedure:
+	endProcedure:
 	
-	 ; pop esi
-	 ; pop edx
-	 ; pop ecx
-	 ; pop ebx
-	 ; pop ebp
+	 pop esi
+	 pop edx
+	 pop ecx
+	 pop ebx
+	 pop ebp
 	
 	RET
 	
@@ -674,6 +677,9 @@ First_Empty Proc Near32
 	.IF byte ptr[ebx+esi] != 0 && esi <1280
 		add esi, 128
 		JMP search
+	.ELSEIF esi == 1280
+		JMP notFound
+		
 	.ELSE
 		JMP endProcedure
 		
