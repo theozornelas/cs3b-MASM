@@ -68,6 +68,8 @@
 	strSearchString				byte 128 dup(?)
 	strEditString				byte 128 dup(?)
 	
+	strMemoryConsumed			byte 3000 dup(?)
+	
 		.code
 _start:
 	mov EAX, 0									; ensures first instruction can be executed in Ollydbg
@@ -78,9 +80,20 @@ _start:
 	call setTextColor							;call the propcedure from the external libraries
 	add esp, 2 									;add 2 bytes to the esp 
 	
+	
+	call Clrscr
 	call output_header							;ouput the class header
+	JMP beginning
+	
+clearScreen:
+		call Clrscr
+
 beginning:
-						
+	
+	
+	;wait for user confirmation
+	;call WaitMsg
+	
 	call output_menu							;output the user menu
 	
 	INVOKE getstring, ADDR strChoice, 32		;get the user's choice from the menu
@@ -127,7 +140,10 @@ viewAll:
 	push offset bWordArray
 	call Display_Array
 	add esp, 4
-	JMP beginning
+	
+	call Crlf
+	call WaitMsg
+	JMP clearScreen
 	
 addString:
 	
@@ -137,11 +153,12 @@ addString:
 	INVOKE getstring, ADDR strAddString, 128
 	
 	push offset strAddString		;push word to add
-	push offset bWordArray			;push the array 
 	call Add_String
-	add esp, 8
+	add esp, 4
 	
-	JMP beginning
+	call Crlf
+	call WaitMsg
+	JMP clearScreen
 	
 deleteString:
 	
@@ -149,7 +166,9 @@ deleteString:
 	mWrite "What string you want to delete? "
 	INVOKE getstring, ADDR strDeleteString, 128
 	call Crlf
-	JMP beginning
+	
+	call WaitMsg
+	JMP clearScreen
 	
 editString:
 	
@@ -157,7 +176,9 @@ editString:
 	mWrite "What string you want to edit? "
 	INVOKE getstring, ADDR strEditString, 128
 	call Crlf
-	JMP beginning
+	
+	call WaitMsg
+	JMP clearScreen
 	
 stringSearch:
 	
@@ -165,14 +186,25 @@ stringSearch:
 	mWrite "What string you want to search? "
 	INVOKE getstring, ADDR strSearchString, 128
 	call Crlf
-	JMP beginning
+	
+	call WaitMsg
+	JMP clearScreen
 	
 memoryConsuuption:
 	
 	call Crlf
 	mWrite "The memory consumption is currently: "
+	
+	
+	call Check_Memory
+	
+	INVOKE intasc32, addr strMemoryConsumed, eax
+	INVOKE putstring, addr strMemoryConsumed
+	
 	call Crlf
-	JMP beginning
+	
+	call WaitMsg
+	JMP clearScreen
 
 
 invalidMessage:
@@ -180,21 +212,26 @@ invalidMessage:
 	call Crlf
 	mWrite "Invalid Input. Please input a number between 1 and 7"
 	
-	JMP beginning
+	call Crlf
+	call WaitMsg
+	JMP clearScreen
 	
 issavalid:
 
 	call Crlf
 	mWrite "Valid Data Inputted"
-	;call Clrscr
-	JMP beginning
+
+	call Crlf
+	call WaitMsg
+	JMP clearScreen
 	
 	;225 if else 
 	
 endprogram:
 	call Crlf
 	mWrite "Thank You, have an average day!"
-	
+	call Crlf
+	call WaitMsg
 	
 	;reset the command window color
 	mov AX, lightGray
@@ -220,15 +257,18 @@ endprogram:
 Check_Spot Proc Near32
 	push ebp		
 	mov ebp, esp
+	
 	push ebx
 	push ecx
 	push esi
 	
 	mov esi, 0
 	
-	mov ebx, [esp+8]		;number
-	mov ecx, [esp+12]		;array
+	mov ebx, offset bWordArray	;load array into the ebx
+	mov ecx, [esp+8]			;number
 	
+	;if any of the start indexes for the strings is empty, then
+	;break out of the procedure
 	
 	.IF ebx == 1
 		cmp byte ptr[ecx[ebx]], 0
@@ -265,16 +305,22 @@ Check_Spot Proc Near32
 		
 	.ENDIF
 
+	;the spot is empty so return true (1)
 	emptySpot:
-		mov esi, -1
+		mov esi, 1
 		JMP endProcedure
 		
+	;the spot is not empty so return false (choosed -1 because yes)
 	notEmpty:
-		mov esi, 1
+		mov esi, -1
 		
+	;do the end operations
 	endProcedure:
+	
+		;return if the spot is open
 		mov eax, esi
 	
+		;pop registers from the stack
 		pop esi
 		pop ecx
 		pop ebx
@@ -296,44 +342,55 @@ Display_Array PROC Near32
 	push edi				;used to loop through the section
 	push ecx				;stores the current max	
 	
-	mov ebx, [ebp + 8]
-	mov esi, 0
-	mov edi, 0
+	mov ebx, [ebp + 8]		;points to the array
+	mov esi, 0				;initialize the iterator to zero
+	mov edi, 0				;set the sector iterator to zero
 	
-	;make local variable for display?
-	
+	;loop that iterates the array
 	loopBack:
+	
+		;if is not the end of the array
 		.IF esi < 10
-			inc esi
+			
 			mWrite "String #: "
-			;WriteDec esi
 			
-			.IF ebx == 0
-				mWrite "vacio"
-				JMP loopBack
-			
-			.ENDIF
-			
-			
+			;converst the index into a char for output
 			mov eax, esi
 			add eax, 30h
 			
 			INVOKE putch, al
 			
+			inc esi								;increase the index
+			
+			;display character label
 			displayChar:
 			
-			cmp edi, 1280
-			JE  loopBack
-			INVOKE putstring, [ebx +esi]
-			
-			inc esi
-			add edi, 128
-			JMP displayChar
+				.IF byte ptr[ebx + edi] == 0	;if the spot is empty
+					mWrite "  <Empty Spot>"		;write empty spot
+					call Crlf					;newline
+					add edi, 128				;add 128 (go forward 128)
+					JMP loopBack				;loop in the next sector
 				
+				.ENDIF
 			
-			call Crlf
+			; ;if is the end of the string
+			; cmp edi, 1280
+			; JE  endProc
+			
+			INVOKE putstring, [ebx +edi]	    ;else output the contents
+			
+			inc esi								;increment the index
+			add edi, 128						;advance 128 characters
+			
+			;if is the end of the string
+			cmp edi, 1280
+			JE  endProc
+			
+			JMP displayChar						;go back to the loop
+				
+			call Crlf							;newline
 		.ELSE
-			JMP endProc
+			JMP endProc							;if is the end of the array, escape
 		.ENDIF
 	JMP loopBack
 
@@ -357,15 +414,15 @@ Add_String PROC Near32
 	mov ebp, esp
 
 	push ebx				;reserve the ebx register
-	push ecx
-	push edx
+	push ecx				;reserve the ecx register
+	push edx				;reserve the edx register
 	push esi 				;reserve the esi register
 	
-	mov ebx, [ebp + 8]		;points to the first thing in the stack, in this case is the array
-	mov ecx, [ebp + 12]		;points to the second thing in the stack, in this case is the string to add
-	mov esi, 0				;initialize esi to zero
+	mov ebx, offset bWordArray	;points to the first thing in the stack, in this case is the array
+	mov ecx, [ebp + 8]		    ;points to the second thing in the stack, in this case is the string to add
+	mov esi, 0				    ;initialize esi to zero
 	
-	.IF ebx == 0				;array is empty
+	.IF byte ptr[ebx+esi] == 0				;array is empty
 		;then add first index
 		mov [ebx + esi], ecx
 		JMP endProcedure
@@ -436,6 +493,49 @@ Delete_String PROC Near32
 	
 Delete_String endp
 
+;**********************************************************
+;This procedure is to check the size of the array
+;**********************************************************	
+Check_Memory Proc Near32
+	push ebp					
+	mov ebp, esp
+	
+	push ebx						;preserve the ebx register
+	push esi						;preserve the esi register
+	push edi						;preserve the edi register
+	
+	mov ebx, offset bWordArray		;put the array into the resgister
+	mov esi, 0						;initialize byte iterator to zero
+	mov edi, 0						;initialize used space counter to zero
+	
+	;this lopp iterates through the whole array
+loopStart:
+
+	;if the counter reaches 1280(the end of the array)
+	cmp esi,1200
+	JE endProcedure
+
+	.IF byte ptr[ebx+esi] == 0		;if the content at that byte is null (0)
+		inc esi						;increase the esi to go forward in the array
+		jmp loopStart				;loop back
+	.ELSE							;else the spot is not empty
+		inc edi						;increment the amount of non empty spots
+		inc esi						;increment the index
+		jmp loopStart				;loop back
+	.ENDIF							;end block
+	
+	;end the procedure
+endProcedure:
+
+	mov eax, edi					;move the amount of used spots in the eax
+	
+	;pop registers from the stack
+	pop edi
+	pop esi
+	pop ebx
+
+	RET 
+Check_Memory endp
 
 ;**********************************************************
 ;Modify a string in the array
