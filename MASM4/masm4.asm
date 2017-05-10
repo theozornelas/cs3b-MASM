@@ -350,8 +350,8 @@ Display_Array PROC Near32
 	loopBack:
 	
 		;if is not the end of the array
-		.IF esi < 10
-			
+		;.IF esi < 10
+		.IF edi < 1280
 			mWrite "String #: "
 			
 			;converst the index into a char for output
@@ -373,20 +373,13 @@ Display_Array PROC Near32
 				
 				.ENDIF
 			
-			; ;if is the end of the string
-			; cmp edi, 1280
-			; JE  endProc
-			
+			mWrite "  "
 			INVOKE putstring, [ebx +edi]	    ;else output the contents
-			
-			inc esi								;increment the index
+			call Crlf	
+			;inc esi								;increment the index
 			add edi, 128						;advance 128 characters
-			
-			;if is the end of the string
-			cmp edi, 1280
-			JE  endProc
-			
-			JMP displayChar						;go back to the loop
+
+			JMP loopBack						;go back to the loop
 				
 			call Crlf							;newline
 		.ELSE
@@ -422,12 +415,13 @@ Add_String PROC Near32
 	mov ecx, [ebp + 8]		    ;points to the second thing in the stack, in this case is the string to add
 	mov esi, 0				    ;initialize esi to zero
 	
-	.IF byte ptr[ebx+esi] == 0				;array is empty
+	.IF byte ptr[ebx+esi] == 0				;first spot is empty
+		
 		;then add first index
-		mov [ebx + esi], ecx
-		JMP endProcedure
+		mov [ebx + esi], ecx				;put the contents in thae first spot
+		JMP endProcedure					;leave the procedure
 	.ELSE
-		JMP findSpot
+		JMP findSpot						;if the first is not empty find the first available spot
 		
 	.ENDIF
 	
@@ -438,13 +432,14 @@ findSpot:
 	call First_Empty
 	add esp, 4
 	
-	mov edx, eax
+	mov esi, eax
 	
 	;this moves the content?
-	mov[ebx + edx], ecx
+	mov[ebx + esi], ecx
 	
 	
 endProcedure:
+
 	pop esi
 	pop edx
 	pop ecx
@@ -669,7 +664,7 @@ First_Empty Proc Near32
 	
 	search:
 	.IF byte ptr[ebx+esi] != 0 && esi <1280
-		add esi, 127
+		add esi, 128
 		JMP search
 	.ELSE
 		JMP endProcedure
