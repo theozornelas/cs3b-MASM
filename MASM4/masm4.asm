@@ -86,13 +86,11 @@ _start:
 	JMP beginning
 	
 clearScreen:
-		call Clrscr
+		call Clrscr								;clear the screen so only the current interface can be seen
 
+	;the beginning of the user option interface
 beginning:
-	
-	
-	;wait for user confirmation
-	;call WaitMsg
+
 	
 	call output_menu							;output the user menu
 	
@@ -132,81 +130,90 @@ beginning:
 ;here are the labels to prompt the user and display the desired
 ;operations from the menu
 ;*****************************************************************	
-viewAll:
+viewAll:										;view all the string in the array
 	
 	call Crlf
 	mWrite "Displaying all Strings: "
 	call Crlf
-	push offset bWordArray
-	call Display_Array
-	add esp, 4
+	push offset bWordArray						;push the array into the procedure
+	call Display_Array							;call the disply array procedure
+	add esp, 4									;add 4 to the esp
 	
-	call Crlf
-	call WaitMsg
-	JMP clearScreen
+	call Crlf									;clear the screen
+	call WaitMsg								;wait for the user to hit a key
+	JMP clearScreen								;go to clear screen label
 	
+;here we add a string into the array
 addString:
 	
 	call Crlf
-	mWrite "Enter a new String: "
+	mWrite "Enter a new String: "				;prompt the user
 	
-	INVOKE getstring, ADDR strAddString, 128
+	INVOKE getstring, ADDR strAddString, 128	;getstring
 	
-	push offset strAddString		;push word to add
-	call Add_String
-	add esp, 4
+	push offset strAddString					;push word to add
+	call Add_String								;call the add procedure
+	add esp, 4									;add 4 to the esp
 	
+	;clear screen, wait for input, and jump back to the beginning to clear the screen
 	call Crlf
 	call WaitMsg
 	JMP clearScreen
 	
+	;in this label a string will be deleted
 deleteString:
 	
 	call Crlf
-	mWrite "What string you want to delete? "
+	mWrite "What string you want to delete? "	;prompt for the string to delete
 	INVOKE getstring, ADDR strDeleteString, 128
 	call Crlf
 	
 	call WaitMsg
 	JMP clearScreen
 	
+	;in this label we edit a string inside the string
 editString:
 	
 	call Crlf
-	mWrite "What string you want to edit? "
+	mWrite "What string you want to edit? "		;prompt user for what string index to modify
 	INVOKE getstring, ADDR strEditString, 128
-	call Crlf
 	
+	;clear screen, wait for input, and jump back to the beginning to clear the screen
+	call Crlf
 	call WaitMsg
 	JMP clearScreen
 	
+	;in this label we find all the instances of a string within the array
 stringSearch:
 	
-	call Crlf
-	mWrite "What string you want to search? "
+	call Crlf										
+	mWrite "What string you want to search? "	;prompt the user for the string to search
 	INVOKE getstring, ADDR strSearchString, 128
-	call Crlf
 	
+	;clear screen, wait for input, and jump back to the beginning to clear the screen
+	call Crlf
 	call WaitMsg
 	JMP clearScreen
 	
+	;In this label we show the user the amount of memory used (spaces used out of 1280)
 memoryConsuuption:
 	
-	call Crlf
+	call Crlf											;output the memory consumption to the user
 	mWrite "The memory consumption is currently: "
 	
 	
-	call Check_Memory
+	;call Check_Memory									;call the calculating function
 	
-	INVOKE intasc32, addr strMemoryConsumed, eax
-	INVOKE putstring, addr strMemoryConsumed
+	;INVOKE intasc32, addr strMemoryConsumed, eax		;put result from eax into a string
+	;INVOKE putstring, addr strMemoryConsumed			;output the string
 	
+	;clear screen, wait for input, and jump back to the beginning to clear the screen
 	call Crlf
-	
 	call WaitMsg
 	JMP clearScreen
 
 
+	;if there is a invalid input let the user know the actual boundaries
 invalidMessage:
 
 	call Crlf
@@ -216,6 +223,7 @@ invalidMessage:
 	call WaitMsg
 	JMP clearScreen
 	
+	;if it is a valid input
 issavalid:
 
 	call Crlf
@@ -225,8 +233,8 @@ issavalid:
 	call WaitMsg
 	JMP clearScreen
 	
-	;225 if else 
-	
+
+;end the program	
 endprogram:
 	call Crlf
 	mWrite "Thank You, have an average day!"
@@ -796,7 +804,7 @@ output_header PROC Near32
 	call Crlf	
 	mWrite "Class:      CS3B" 
 	call Crlf	
-	mWrite "Date:       TBD" 
+	mWrite "Date:       5/10/17" 
 	call Crlf	
 
 	RET
