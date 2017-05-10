@@ -166,6 +166,11 @@ deleteString:
 	call Crlf
 	mWrite "What string you want to delete? "	;prompt for the string to delete
 	INVOKE getstring, ADDR strDeleteString, 128
+	
+	;push offset strDeleteString
+	;call Delete_String
+	;add esp, 4
+	
 	call Crlf
 	
 	call WaitMsg
@@ -272,51 +277,57 @@ Check_Spot Proc Near32
 	
 	mov esi, 0
 	
-	mov ebx, offset bWordArray	;load array into the ebx
-	mov ecx, [esp+8]			;number
+	mov ecx, offset bWordArray	;load array into the ebx
+	;mov ecx, [esp+8]			;number
 	
 	;if any of the start indexes for the strings is empty, then
 	;break out of the procedure
 	
-	.IF ebx == 1
-		cmp byte ptr[ecx[ebx]], 0
-		JE emptySpot
-	.ELSEIF ebx == 2
-		cmp byte ptr[ecx[128]], 0
-		JE emptySpot
-	.ELSEIF ebx == 3
-		cmp byte ptr[ecx[256]], 0
-		JE emptySpot
-	.ELSEIF ebx == 4
-		cmp byte ptr[ecx[384]], 0
-		JE emptySpot
-	.ELSEIF ebx == 5
-		cmp byte ptr[ecx[512]], 0
-		JE emptySpot
-	.ELSEIF ebx == 6
-		cmp byte ptr[ecx[640]], 0
-		JE emptySpot
-	.ELSEIF ebx == 7
-		cmp byte ptr[ecx[768]], 0
-		JE emptySpot
-	.ELSEIF ebx == 8
-		cmp byte ptr[ecx[896]], 0
-		JE emptySpot
-	.ELSEIF ebx == 9
-		cmp byte ptr[ecx[1024]], 0
-		JE emptySpot
-	.ELSEIF ebx == 10
-		cmp byte ptr[ecx[1152]], 0
-		JE emptySpot
+	.IF byte ptr[ecx[0]] == 0
+		mov esi, 0
+		JMP endProcedure
+		
+	.ELSEIF  byte ptr[ecx[128]] == 0
+		mov esi, 128
+		JMP endProcedure
+		
+	.ELSEIF byte ptr[ecx[256]] == 0
+		mov esi, 256
+		JMP endProcedure
+		
+	.ELSEIF byte ptr[ecx[384]] == 0
+		mov esi, 384
+		JE endProcedure
+		
+	.ELSEIF byte ptr[ecx[512]] == 0
+		mov esi, 512
+		JE endProcedure
+	
+	.ELSEIF byte ptr[ecx[640]] == 0
+		mov esi, 640
+		JE endProcedure
+		
+	.ELSEIF byte ptr[ecx[768]] == 0
+		mov esi, 768
+		JE endProcedure
+		
+	.ELSEIF byte ptr[ecx[896]] == 0
+		mov esi, 896
+		JE endProcedure
+		
+	.ELSEIF  byte ptr[ecx[1024]] == 0
+		mov esi, 1024
+		JE endProcedure
+		
+	.ELSEIF  byte ptr[ecx[1152]] == 0
+		mov esi, 1152
+		JE endProcedure
+	
 	.ELSE
 		JMP notEmpty
 		
 	.ENDIF
 
-	;the spot is empty so return true (1)
-	emptySpot:
-		mov esi, 1
-		JMP endProcedure
 		
 	;the spot is not empty so return false (choosed -1 because yes)
 	notEmpty:
@@ -386,7 +397,11 @@ Display_Array PROC Near32
 				call Crlf	
 				;inc esi								;increment the index
 				add edi, 128						;advance 128 characters
-
+				
+				;call Crlf
+				;mWrite "inside the else in add"
+				;call Crlf
+				
 				JMP loopBack						;go back to the loop
 					
 				call Crlf							;newline
@@ -428,24 +443,38 @@ Add_String PROC Near32
 	
 	.IF byte ptr[ebx+esi] == 0				;first spot is empty
 		
+		call Crlf
+		mWrite "writing on the first spot"
+		call Crlf
+		
 		;then add first index
 		mov [ebx + esi], ecx				;put the contents in thae first spot
 		JMP endProcedure					;leave the procedure
 	.ELSE
 		JMP findSpot						;if the first is not empty find the first available spot
+		call Crlf
+		mWrite "Finding the new spot"
+		call Crlf
 		
 	.ENDIF
 	
 	
 	;find the correct spot to add the string into
 findSpot:
-	push ebx
-	call First_Empty
-	add esp, 4
+	; push ebx
+	; call First_Empty
+	; add esp, 4
 	
-	mov esi, eax
+	call Check_Spot
+	
+	mov esi, eax							;stores the first available spot into the esi, since the proc stored it in the eax
 	
 	;this moves the content?
+	
+	call Crlf
+	mWrite "Writing the new content"
+	call Crlf
+	
 	mov[ebx + esi], ecx
 	
 	
@@ -472,23 +501,44 @@ Delete_String PROC Near32
 	push ebx					;reserve the ebx register	
 	push ecx					;reserve the ebx register
 	push esi
+	push edx
+	push edi
 	
 	mov ebx, offset bWordArray	;allocate the array into the ebx
 	mov ecx, [esp + 8]      	;number to delete
 	
-	;get the start points
-	;get the end points
+	;get the start points (use iMul)
+	
+	mov eax, ecx				;load index into the eax
+	mov edx, 128				;put 128 in another register
+	imul edx					;multiply the index times 128
+	mov esi, eax				;esi now has the starting point
+	
+	
+	;get the end points (store esi + 128 in a register)		????????????
+	mov ecx, esi
+	add ecx, 128
+	mov edx, eax				;now the edx has stored the upper boundary
+	
+	
+	
 	;while counter is within those boundaries
 	;replace the value with zeroes
 	;end the program
 	
 	deleteLoop:
-		mov dl, 0
-		mov [ebx + esi], dl
+		mov cl, 0
+		mov [ebx + esi], cl
+		inc esi
+		
+		cmp esi, edx
+		JE endProcedure
 		
 	JMP deleteLoop
 	
 	endProcedure:
+		pop edi
+		pop edx
 		pop esi
 		pop ecx
 		pop ebx
