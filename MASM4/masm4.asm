@@ -149,7 +149,7 @@ addString:
 	call Crlf
 	mWrite "Enter a new String: "				;prompt the user
 	
-	INVOKE getstring, ADDR strAddString, 128	;getstring
+	INVOKE getstring, ADDR strAddString, 127	;getstring
 	
 	push offset strAddString					;push word to add
 	call Add_String								;call the add procedure
@@ -207,10 +207,10 @@ memoryConsuuption:
 	mWrite "The memory consumption is currently: "
 	
 	
-	;call Check_Memory									;call the calculating function
+	call Check_Memory									;call the calculating function
 	
-	;INVOKE intasc32, addr strMemoryConsumed, eax		;put result from eax into a string
-	;INVOKE putstring, addr strMemoryConsumed			;output the string
+	INVOKE intasc32, addr strMemoryConsumed, eax		;put result from eax into a string
+	INVOKE putstring, addr strMemoryConsumed			;output the string
 	
 	;clear screen, wait for input, and jump back to the beginning to clear the screen
 	call Crlf
@@ -263,6 +263,19 @@ endprogram:
 ;The following procedures are used to do the required
 ;operations for this assignment
 ;**********************************************************
+	
+;**********************************************************
+;Find the address of the first index
+;**********************************************************
+Find_Address Proc Near32
+	push ebp		
+	mov ebp, esp
+	push ebx
+	
+	mov ebx, offset bWordArray
+
+
+Find_Address endp	
 	
 ;**********************************************************
 ;Check for an empty spot as in a switch statement
@@ -361,7 +374,7 @@ Display_Array PROC Near32
 	push edi				;used to loop through the section
 	push ecx				;stores the current max	
 	
-	mov ebx, [ebp + 8]		;points to the array
+	mov ebx, offset bWordArray		;points to the array
 	mov esi, 0				;initialize the iterator to zero
 	mov edi, 0				;set the sector iterator to zero
 	
@@ -384,18 +397,20 @@ Display_Array PROC Near32
 			;display character label
 			displayChar:
 			
-			.IF byte ptr[ebx + edi] == 0	;if the spot is empty
+			.IF byte ptr [ebx] == 0; byte ptr[ebx + edi] == 0	;if the spot is empty
 				mWrite "  <Empty Spot>"		;write empty spot
 				call Crlf					;newline
 				add edi, 128				;add 128 (go forward 128)
+				add ebx, 128
 				JMP loopBack				;loop in the next sector
 			
 			.ELSE							;else is not empty
 			
 				mWrite "  "
-				INVOKE putstring, [ebx +edi]	    ;else output the contents
+				INVOKE putstring, ebx ;[ebx +edi]	    ;else output the contents
 				call Crlf	
 				;inc esi								;increment the index
+				add ebx, 128
 				add edi, 128						;advance 128 characters
 				
 				;call Crlf
@@ -441,6 +456,12 @@ Add_String PROC Near32
 	mov ecx, [ebp + 8]		    ;points to the second thing in the stack, in this case is the string to add
 	mov esi, 0				    ;initialize esi to zero
 	
+	;ecx has the address of the string to be added to the db
+	;b has the address of the db
+	
+	;need procedure to retrieve address within db that corresponds to the string number
+	
+	COMMENT%
 	.IF byte ptr[ebx+esi] == 0				;first spot is empty
 		
 		call Crlf
@@ -457,7 +478,7 @@ Add_String PROC Near32
 		call Crlf
 		
 	.ENDIF
-	
+	%
 	
 	;find the correct spot to add the string into
 findSpot:
@@ -467,19 +488,24 @@ findSpot:
 	
 	call Check_Spot
 	
-	mov esi, eax							;stores the first available spot into the esi, since the proc stored it in the eax
+	add ebx, eax	;Have B point to the address within the db range
 	
-	;this moves the content?
-	
-	call Crlf
-	mWrite "Writing the new content"
-	call Crlf
-	
-	mov[ebx + esi], ecx
+	;Writes each byte directly into the db
+toTop:
+	push ecx
+	mov cl, [ecx]
+	mov [ebx], cl
+	pop ecx
+	inc ebx
+	inc ecx
+	cmp byte ptr [ecx], 0	;When null is reached
+	je endProcedure
+	jmp toTop
 	
 	
 endProcedure:
-
+	mov byte ptr [ebx], 0	;Write the null terminator
+	
 	pop esi
 	pop edx
 	pop ecx
