@@ -71,7 +71,7 @@
 	
 	strMemoryConsumed			byte 3000 dup(?)					;stores the amount of memory consumed
 	
-	dIndexChoice				dword dup(?)						;string to  delete
+	dIndexChoice				dword 	?					;string to  delete
 	
 		.code
 _start:
@@ -170,9 +170,10 @@ deleteString:
 	mWrite "What string you want to delete? "	;prompt for the string to delete
 	INVOKE getstring, ADDR strDeleteString, 128
 	
-	INVOKE ascint32, ADDR dIndexChoice, ADDR strDeleteString
+	INVOKE ascint32,  ADDR strDeleteString
+	mov dIndexChoice, eax
 	
-	push offset dIndexChoice
+	push dIndexChoice
 	call Delete_String
 	add esp, 4
 	
@@ -551,7 +552,9 @@ Delete_String PROC Near32
 	add ecx, 128
 	mov edx, eax				;now the edx has stored the upper boundary
 	
-	
+	call Crlf
+	mWrite "Before the Loop"
+	call Crlf
 	
 	;while counter is within those boundaries
 	;replace the value with zeroes
@@ -562,12 +565,22 @@ Delete_String PROC Near32
 		mov [ebx + esi], cl
 		inc esi
 		
+		
+	call Crlf
+	mWrite "inside the Loop"
+	call Crlf
+		
 		cmp esi, edx
 		JE endProcedure
 		
 	JMP deleteLoop
 	
 	endProcedure:
+	
+	call Crlf
+	mWrite "end the procedure"
+	call Crlf
+	
 		pop edi
 		pop edx
 		pop esi
