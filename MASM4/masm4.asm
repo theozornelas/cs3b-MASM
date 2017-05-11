@@ -70,6 +70,9 @@
 	strEditString				byte 128 dup(?)						;stores the number of the string to be edited
 	
 	strMemoryConsumed			byte 3000 dup(?)					;stores the amount of memory consumed
+	
+	dIndexChoice				dword dup(?)						;string to  delete
+	
 		.code
 _start:
 	mov EAX, 0									; ensures first instruction can be executed in Ollydbg
@@ -167,9 +170,11 @@ deleteString:
 	mWrite "What string you want to delete? "	;prompt for the string to delete
 	INVOKE getstring, ADDR strDeleteString, 128
 	
-	;push offset strDeleteString
-	;call Delete_String
-	;add esp, 4
+	INVOKE ascint32, ADDR dIndexChoice, ADDR strDeleteString
+	
+	push offset dIndexChoice
+	call Delete_String
+	add esp, 4
 	
 	call Crlf
 	
