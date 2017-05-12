@@ -127,7 +127,7 @@ beginning:
 	JE stringSearch
 	
 	cmp eax, 6									;if the input is 6, then we go to the label where we show the user the current memory consumption
-	JE memoryConsuuption
+	JE memoryConsuption
 
 ;*****************************************************************
 ;here are the labels to prompt the user and display the desired
@@ -207,7 +207,7 @@ stringSearch:
 	JMP clearScreen
 	
 	;In this label we show the user the amount of memory used (spaces used out of 1280)
-memoryConsuuption:
+memoryConsuption:
 	
 	call Crlf											;output the memory consumption to the user
 	mWrite "The memory consumption is currently: "
@@ -544,31 +544,49 @@ Delete_String PROC Near32
 	mov eax, ecx				;load index into the eax
 	mov edx, 128				;put 128 in another register
 	imul edx					;multiply the index times 128
-	mov esi, eax				;esi now has the starting point
+	mov esi, edx				;esi now has the starting point
 	
 	
 	;get the end points (store esi + 128 in a register)		????????????
 	mov ecx, esi
 	add ecx, 128
-	mov edx, eax				;now the edx has stored the upper boundary
+	mov edx, ecx				;now the edx has stored the upper boundary
 	
-	call Crlf
-	mWrite "Before the Loop"
-	call Crlf
+	; call Crlf
+	; mWrite "Before the Loop"
+	; call Crlf
 	
 	;while counter is within those boundaries
 	;replace the value with zeroes
 	;end the program
 	
+	mov ecx, 0
+	
 	deleteLoop:
-		mov cl, 0
-		mov [ebx + esi], cl
+	
+	; call Crlf
+	; mWrite "Before moving zero"
+	; call Crlf
+	
+	mov cl, 0
+		
+		
+		
+	; call Crlf
+	; mWrite "after moving zero into the cl"
+	; call Crlf
+		
+		mov byte ptr[ebx + esi], cl
 		inc esi
 		
+	; call Crlf
+	; mWrite "after putting cl into ebx+esi"
+	; call Crlf
 		
-	call Crlf
-	mWrite "inside the Loop"
-	call Crlf
+		
+	; call Crlf
+	; mWrite "after moving zero in the spot"
+	; call Crlf
 		
 		cmp esi, edx
 		JE endProcedure
@@ -577,9 +595,9 @@ Delete_String PROC Near32
 	
 	endProcedure:
 	
-	call Crlf
-	mWrite "end the procedure"
-	call Crlf
+	; call Crlf
+	; mWrite "end the procedure"
+	; call Crlf
 	
 		pop edi
 		pop edx
@@ -648,38 +666,32 @@ String_Edit Proc Near32
 	push ecx
 	push edx				;current position
 	push esi
+	push edi
 	
-	mov ebx, [esp+8]		;string number
-	mov ecx, [esp+8]		;string to replace with
+	mov ebx, [esp+12]		;string to replace with
+	mov ecx, [esp+8]		;string number
+	mov edx, offset bWordArray
 	mov esi ,0
 	
-	; mov edx, ebx * 128
 	
-	; .IF [ebx + edx] != 0
-		; ;replace
-		
-		; loopBack:
-			; mov [ebx + edx], [ecx + esi]
-			; inc edi
-			; inc esi
-			; ;if the esi is the same as string size, go to clear everything else
-		; JMP loopBack
-		; ;call string replace
-		; JMP endProcedure
-		
-	; .ELSE
-		; JMP empty
-	; .ENDIF
+	;get the start points (use iMul)
+	
+	mov eax, ecx				;load index into the eax
+	mov edi, 128				;put 128 in another register
+	imul edi					;multiply the index times 128
+	mov esi, edi				;esi now has the starting point
 	
 	
-	; clearAll:
-		; ;go to current address and clear until (ebx * 128) + 128
-		
-		; mov [ebx + edx],0
-		; cmp edi, ebx+1 * 128
-		; JE endProcedure
-		
-		; JMP clearAll
+	;get the end points (store esi + 128 in a register)		????????????
+	mov ecx, esi
+	add ecx, 128
+	mov edi, ecx				;now the edi has stored the upper boundary
+	
+	.IF [esi] == 0
+		JMP empty
+	
+
+	.ENDIF
 	
 	empty:
 		mWrite "The spot is empty, cannot replace the string"
