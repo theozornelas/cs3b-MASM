@@ -552,10 +552,6 @@ Delete_String PROC Near32
 	add ecx, 128
 	mov edx, ecx				;now the edx has stored the upper boundary
 	
-	; call Crlf
-	; mWrite "Before the Loop"
-	; call Crlf
-	
 	;while counter is within those boundaries
 	;replace the value with zeroes
 	;end the program
@@ -563,33 +559,15 @@ Delete_String PROC Near32
 	mov ecx, 0
 	
 	deleteLoop:
-	
-	; call Crlf
-	; mWrite "Before moving zero"
-	; call Crlf
-	
+
 	mov cl, 0
 		
-		
-		
-	; call Crlf
-	; mWrite "after moving zero into the cl"
-	; call Crlf
-		
-		mov byte ptr[ebx + esi], cl
-		inc esi
-		
-	; call Crlf
-	; mWrite "after putting cl into ebx+esi"
-	; call Crlf
-		
-		
-	; call Crlf
-	; mWrite "after moving zero in the spot"
-	; call Crlf
-		
-		cmp esi, edx
+	mov byte ptr[ebx + esi], cl
+	inc esi
+	
+	.IF edx == esi
 		JE endProcedure
+	.ENDIF
 		
 	JMP deleteLoop
 	
@@ -687,7 +665,7 @@ String_Edit Proc Near32
 	add ecx, 128
 	mov edi, ecx				;now the edi has stored the upper boundary
 	
-	.IF [esi] == 0
+	.IF byte ptr[esi] == 0
 		JMP empty
 	
 
