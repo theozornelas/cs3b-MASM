@@ -199,17 +199,8 @@ editString:
 	push dIndexChoice
 	push offset strAddString
 	
-	call Crlf 
-	mWrite "before call"
-	call Crlf  
-	
 	call String_Edit
-	
-	call Crlf 
-	mWrite "After call"
-	call Crlf  
-	
-	
+	 
 	add esp, 8
 	
 	;clear screen, wait for input, and jump back to the beginning to clear the screen
@@ -571,6 +562,14 @@ getch 		PROTO Near32 stdcall
 	JE empty
 	
 ;Get the array at that position
+;confirm edit
+		call Crlf
+		mWrite "Confirm Deletion Y/N (upper case only): "
+		INVOKE getche
+		call Crlf
+		
+		cmp al, 'Y'
+		JNE notDeleted
 	
 	deleteLoop:
 	
@@ -586,12 +585,16 @@ getch 		PROTO Near32 stdcall
 		
 	JMP deleteLoop
 	
-	
+	;if the spot is taken
 	empty:
 		call Crlf
 		mWrite "cannot delete empty spot"
 		call Crlf
-	
+		
+	notDeleted:
+		call Crlf
+		mWrite "The operation was cancelled"
+		call Crlf
 	
 	endProcedure:
 	
@@ -699,6 +702,15 @@ String_Edit Proc Near32
 	
 	mov cl, 0
 
+	;confirm edit
+		call Crlf
+		mWrite "Confirm Edit Y/N (upper case only): "
+		INVOKE getche
+		call Crlf
+		
+		cmp al, 'Y'
+		JNE notDeleted
+	
 
 	writeLoop:		
 		mov byte ptr[ebx + esi], 0
@@ -755,6 +767,11 @@ writeNewData:
 empty:
 	call Crlf
 	mWrite "The spot is empty, cannot replace the string"
+	call Crlf
+	
+notDeleted:
+	call Crlf
+	mWrite "The operation was cancelled"
 	call Crlf
 	
 	endProcedure:
