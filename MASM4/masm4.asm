@@ -187,7 +187,30 @@ editString:
 	
 	call Crlf
 	mWrite "What string you want to edit? "		;prompt user for what string index to modify
-	INVOKE getstring, ADDR strEditString, 128
+	INVOKE getstring, ADDR strDeleteString, 128
+	INVOKE ascint32,  ADDR strDeleteString
+	mov dIndexChoice, eax
+	
+	call Crlf
+	mWrite "What string do you want to replace it with? "
+	INVOKE getstring, ADDR strAddString, 128
+	
+	;call the edit procedure
+	push dIndexChoice
+	push offset strAddString
+	
+	call Crlf 
+	mWrite "before call"
+	call Crlf  
+	
+	call String_Edit
+	
+	call Crlf 
+	mWrite "After call"
+	call Crlf  
+	
+	
+	add esp, 8
 	
 	;clear screen, wait for input, and jump back to the beginning to clear the screen
 	call Crlf
@@ -498,12 +521,12 @@ findSpot:
 	
 	;Writes each byte directly into the db
 toTop:
-	push ecx
-	mov cl, [ecx]
-	mov [ebx], cl
-	pop ecx
-	inc ebx
-	inc ecx
+	push ecx				;push the ecx register
+	mov cl, [ecx]			;put whats inside the ecx into the cl
+	mov [ebx], cl			;put the cl into the ebx
+	pop ecx					;pop the register
+	inc ebx					;increase the position
+	inc ecx					;increase the string index
 	cmp byte ptr [ecx], 0	;When null is reached
 	je endProcedure
 	jmp toTop
@@ -557,11 +580,15 @@ Delete_String PROC Near32
 	;end the program
 	
 	mov ecx, 0
+	mov cl, 0
 	
 	deleteLoop:
-
-	mov cl, 0
-		
+	
+	
+	call Crlf
+	mWrite "inside the delete loop"
+	call Crlf
+	
 	mov byte ptr[ebx + esi], cl
 	inc esi
 	
@@ -607,10 +634,15 @@ Check_Memory Proc Near32
 	;this lopp iterates through the whole array
 loopStart:
 
+	; call Crlf
+	; mWrite "beginning of the main loop"
+	; call Crlf
+
 	;if the counter reaches 1280(the end of the array)
 	cmp esi,1280
 	JE endProcedure
 
+	
 	.IF byte ptr[ebx+esi] == 0		;if the content at that byte is null (0)
 		inc esi						;increase the esi to go forward in the array
 		jmp loopStart				;loop back
@@ -629,6 +661,7 @@ endProcedure:
 	pop edi
 	pop esi
 	pop ebx
+	pop ebp
 
 	RET 
 Check_Memory endp
@@ -642,15 +675,19 @@ String_Edit Proc Near32
 	
 	push ebx
 	push ecx
-	push edx				;current position
+	push edx				;array
 	push esi
 	push edi
 	
-	mov ebx, [esp+12]		;string to replace with
-	mov ecx, [esp+8]		;string number
-	mov edx, offset bWordArray
-	mov esi ,0
 	
+	mov ebx, [esp+8]		;string to replace with
+	mov ecx, [esp+12]		;string number
+	mov edx, offset bWordArray
+	;mov esi ,0
+	
+	; call Crlf 
+	; mWrite "after assigning values"
+	; call Crlf  
 	
 	;get the start points (use iMul)
 	
@@ -659,23 +696,74 @@ String_Edit Proc Near32
 	imul edi					;multiply the index times 128
 	mov esi, edi				;esi now has the starting point
 	
+	mov edi,0
 	
 	;get the end points (store esi + 128 in a register)		????????????
 	mov ecx, esi
 	add ecx, 128
 	mov edi, ecx				;now the edi has stored the upper boundary
 	
-	.IF byte ptr[esi] == 0
-		JMP empty
-	
+	;now ecx is free
 
-	.ENDIF
+	; toTop:
+	; push ecx				;push the ecx register
+	; mov cl, [ecx]			;put whats inside the ecx into the cl
+	; mov [ebx], cl			;put the cl into the ebx
+	; pop ecx					;pop the register
+	; inc ebx					;increase the position
+	; inc ecx					;increase the string index
+	; cmp byte ptr [ecx], 0	;When null is reached
+	; je endProcedure
+	; jmp toTop
+	
+	
+call Crlf 
+mWrite "before comparing"
+call Crlf  
+
+
+mov esi, 0
+	
+	;.IF byte ptr[edx + esi] == 0
+	 cmp byte ptr[edx + esi] ,0
+	 je empty
+call Crlf 
+mWrite "inside comparing"
+call Crlf  	
+
+		;JMP empty
+	;.ELSE
+	
+call Crlf 
+mWrite "before writeLoop"
+call Crlf  
+	
+	mov ecx, 0
+	
+	writeLoop:
+		; push ecx
+		call Crlf 
+		mWrite "inside writeLoop"
+		call Crlf  
+
+		mov cl, 0
+		mov [ebx + esi], cl
+		; pop ecx
+		; inc ebx
+		; inc ecx
+		cmp byte ptr [ebx + esi], 0	;When null is reached
+		je endProcedure
+		inc esi
+		JMP writeLoop
+	
+	;.ENDIF
 	
 	empty:
 		mWrite "The spot is empty, cannot replace the string"
 		
 	endProcedure:
 	
+	 pop edi
 	 pop esi
 	 pop edx
 	 pop ecx
